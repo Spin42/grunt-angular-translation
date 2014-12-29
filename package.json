@@ -1,0 +1,46 @@
+{
+  "name": "grunt-angular-translation",
+  "description": "Add this plugin to translate your angular app with translation.io",
+  "version": "0.1.0",
+  "homepage": "https://github.com/Spin42/grunt-angular-translation",
+  "author": {
+    "name": "Spin42",
+    "email": "info@spin42.com",
+    "url": "spin42.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Spin42/grunt-angular-translation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Spin42/grunt-angular-translation/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/Spin42/grunt-angular-translation/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "beg": "git://github.com/Djengo/beg.git#master",
+    "grunt-angular-gettext": "^0.2.15"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt": "~0.4.5"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
