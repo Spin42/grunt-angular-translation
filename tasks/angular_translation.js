@@ -35,16 +35,17 @@ var extractConfig = function(gruntConfig) {
   return config;
 };
 
-var syncPoFiles = function(grunt, config, callback) {
+var syncPoFiles = function(grunt, config, purge, callback) {
   var potData = grunt.file.read(config.potPath);
 
   var params  = {
     target_languages : config.targetLocales,
     pot_data         : potData.toString(),
     gem_version      : config.gemVersion,
-    source_language  : config.sourceLocale
+    source_language  : config.sourceLocale,
+    purge            : purge.toString()
   };
-
+  
   var options = {
     hostname : config.hostname,
     path     : computePath(config.apiKey, "sync"),
@@ -56,9 +57,10 @@ var syncPoFiles = function(grunt, config, callback) {
     Object.keys(body).forEach(function(key) {
       var match = key.match(/^po_data_(.*)/);
       if (match) {
-        var locale   = match[1];
-        var filepath = path.join(config.poPath, locale + ".po");
-        grunt.file.write(filepath, body[key]);
+        var locale       = match[1];
+        var filepath     = path.join(config.poPath, locale + ".po");
+        var localeHeader = "\"Language: " + locale + "\n";
+        grunt.file.write(filepath, localeHeader + body[key]);
       }
     });
     callback();
@@ -107,8 +109,7 @@ module.exports = function(grunt) {
   grunt.registerTask("translation:syncPoFiles", "Send new translatable key/strings and get new translations from translation.io", function() {
     var config = extractConfig(grunt.config);
     var done   = this.async();
-
-    syncPoFiles(grunt, config, function(err){
+    syncPoFiles(grunt, config, false, function(err){
       if (err) {
         grunt.log.error(err);
         return done(false);
@@ -117,9 +118,23 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerTask("translation:syncAndPurge", "Remove unused key/strings from translation.io using the current branch as reference", function() {
-    throw new Error("Unimplemented");
+  grunt.registerTask("translation:syncAndPurgePoFiles", "Send new translatable key/strings and get new translations from translation.io while purging unused keys", function() {
+    var config = extractConfig(grunt.config);
+    var done   = this.async();
+    syncPoFiles(grunt, config, true, function(err){
+      if (err) {
+        grunt.log.error(err);
+        return done(false);
+      }
+      done();
+    });
   });
+
+  grunt.registerTask("translation:syncAndPurge", [
+    "nggettext_extract",
+    "translation:syncAndPurgePoFiles",
+    "nggettext_compile"
+  ]);
 
   grunt.registerTask("translation:sync", [
     "nggettext_extract",
