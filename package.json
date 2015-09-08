@@ -28,7 +28,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "beg": "git://github.com/Djengo/beg.git#master",
+    "beg": "git://github.com/Spin42/beg.git#master",
     "grunt-angular-gettext": "^0.2.15"
   },
   "devDependencies": {
