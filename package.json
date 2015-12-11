@@ -28,7 +28,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "beg": "git://github.com/Spin42/beg.git#master",
+    "node-libcurl": "^0.7.0",
     "grunt-angular-gettext": "^0.2.15"
   },
   "devDependencies": {

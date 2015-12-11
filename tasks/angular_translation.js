@@ -8,7 +8,7 @@
 
 "use strict";
 
-var beg  = require("beg");
+var Curl = require("node-libcurl").Curl;
 var path = require("path");
 
 var computePath = function(apiKey, action) {
@@ -38,22 +38,27 @@ var extractConfig = function(gruntConfig) {
 var syncPoFiles = function(grunt, config, purge, callback) {
   var potData = grunt.file.read(config.potPath);
 
-  var params  = {
+  var params = {
     target_languages : config.targetLocales,
     pot_data         : potData.toString(),
     gem_version      : config.gemVersion,
     source_language  : config.sourceLocale,
     purge            : purge.toString()
   };
-  
-  var options = {
-    hostname : config.hostname,
-    path     : computePath(config.apiKey, "sync"),
-    payload  : params
-  };
 
-  beg.post(options, { parseJson: true, secure: true }, function(err, body) {
-    if (err) return callback(err);
+  var curl = new Curl();
+  var close = curl.close.bind(curl);
+  var uri   = "https://" + path.join(config.hostname, computePath(config.apiKey, "sync"));
+
+  curl.setOpt(Curl.option.URL, uri);
+  curl.setOpt(Curl.option.HTTPHEADER, ["Content-Type: application/json", "Accept: application/json"]);
+  curl.setOpt(Curl.option.POSTFIELDS, JSON.stringify(params));
+  curl.on("error", function(err) {
+    callback(err);
+    this.close();
+  });
+  curl.on("end", function( statusCode, body ) {
+    body = JSON.parse(body);
     Object.keys(body).forEach(function(key) {
       var match = key.match(/^po_data_(.*)/);
       if (match) {
@@ -64,7 +69,9 @@ var syncPoFiles = function(grunt, config, purge, callback) {
       }
     });
     callback();
+    this.close();
   });
+  curl.perform();
 }
 
 var initProject = function(config, callback) {
@@ -79,18 +86,24 @@ var initProject = function(config, callback) {
     params["po_data_" + language] = ""; // Todo: read existing po files
   });
 
-  var options = {
-    hostname : config.hostname,
-    path     : computePath(config.apiKey, "init"),
-    payload  : params
-  };
+  var curl = new Curl();
+  var close = curl.close.bind(curl);
+  var uri   = "https://" + path.join(config.hostname, computePath(config.apiKey, "init"));
 
-  beg.post(options, { parseJson: true, secure: true }, function(err, body) {
-    if (err) return callback(err);
+  curl.setOpt(Curl.option.URL, uri);
+  curl.setOpt(Curl.option.HTTPHEADER, ["Content-Type: application/json", "Accept: application/json"]);
+  curl.setOpt(Curl.option.POSTFIELDS, JSON.stringify(params));
+  curl.perform();
+  curl.on("error", function(err) {
+    callback(err);
+    this.close();
+  });
+  curl.on("end", function( statusCode, body ) {
     callback();
+    this.close();
   });
 }
- 
+
 module.exports = function(grunt) {
   grunt.registerTask("translation:init", "Initialize your translation.io project", function() {
     var done   = this.async();
@@ -100,10 +113,10 @@ module.exports = function(grunt) {
       if (err) {
         grunt.log.error(err);
         return done(false)
-      }  
+      }
       done();
     })
-    
+
   });
 
   grunt.registerTask("translation:syncPoFiles", "Send new translatable key/strings and get new translations from translation.io", function() {
