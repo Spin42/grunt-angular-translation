@@ -1,7 +1,7 @@
 {
   "name": "grunt-angular-translation",
   "description": "Add this plugin to translate your angular app with translation.io",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/Spin42/grunt-angular-translation",
   "author": {
     "name": "Spin42",
@@ -28,7 +28,7 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "node-libcurl": "^0.7.0",
+    "node-libcurl": "^1.0.0",
     "grunt-angular-gettext": "^0.2.15"
   },
   "devDependencies": {
